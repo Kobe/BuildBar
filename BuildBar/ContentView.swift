@@ -9,13 +9,23 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        VStack(alignment: .leading, spacing: 8) {
+            Text("BuildBar")
+                .font(.headline)
+                .padding(.bottom, 4)
+            
+            Button("Check Build Status") {
+                // TODO: Implement build status check
+            }
+            
+            Divider()
+            
+            Button("Quit") {
+                NSApplication.shared.terminate(nil)
+            }
         }
         .padding()
+        .frame(minWidth: 200)
     }
 }
 

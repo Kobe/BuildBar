@@ -10,7 +10,7 @@ import SwiftUI
 @main
 struct BuildBarApp: App {
     var body: some Scene {
-        WindowGroup {
+        MenuBarExtra("BuildBar", systemImage: "hammer.circle") {
             ContentView()
         }
     }
