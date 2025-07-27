@@ -42,9 +42,14 @@ struct ContentView: View {
     }
     
     private var pipelineList: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            ForEach(pipelineStore.pipelines) { pipeline in
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(pipelineStore.pipelines.enumerated()), id: \.element.id) { index, pipeline in
                 PipelineRowView(pipeline: pipeline)
+                
+                if index < pipelineStore.pipelines.count - 1 {
+                    Divider()
+                        .padding(.vertical, 4)
+                }
             }
         }
     }
@@ -67,37 +72,43 @@ struct PipelineRowView: View {
     
     var body: some View {
         HStack(spacing: 8) {
-            Image(systemName: pipeline.status.icon)
-                .foregroundColor(pipeline.status.color)
-                .frame(width: 16)
-                .fixedSize()
-            
-            VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 6) {
+                Image(systemName: pipeline.status.icon)
+                    .foregroundColor(pipeline.status.color)
+                    .frame(width: 16)
+                    .fixedSize()
+                
                 Text(pipeline.name)
                     .font(.system(size: 13, weight: .medium))
                     .fixedSize(horizontal: true, vertical: false)
-                
+            }
+            
+            Spacer()
+            
+            VStack(alignment: .trailing, spacing: 2) {
                 Text(pipeline.repository)
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: true, vertical: false)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            
-            VStack(alignment: .trailing, spacing: 2) {
-                Text(pipeline.duration)
-                    .font(.system(size: 11))
-                    .foregroundColor(.secondary)
-                    .fixedSize(horizontal: true, vertical: false)
                 
-                Text(formatDate(pipeline.lastRun))
-                    .font(.system(size: 10))
-                    .foregroundColor(.gray)
-                    .fixedSize(horizontal: true, vertical: false)
+                HStack(spacing: 4) {
+                    Text(pipeline.duration)
+                        .font(.system(size: 10))
+                        .foregroundColor(.gray)
+                    
+                    Text("•")
+                        .font(.system(size: 10))
+                        .foregroundColor(.gray)
+                    
+                    Text(formatDate(pipeline.lastRun))
+                        .font(.system(size: 10))
+                        .foregroundColor(.gray)
+                }
+                .fixedSize(horizontal: true, vertical: false)
             }
             .fixedSize()
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 6)
     }
     
     private func formatDate(_ date: Date) -> String {
