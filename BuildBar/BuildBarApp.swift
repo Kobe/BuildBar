@@ -12,9 +12,12 @@ struct BuildBarApp: App {
     @StateObject private var pipelineStore = PipelineStore()
     
     var body: some Scene {
-        MenuBarExtra("BuildBar", systemImage: menuBarIcon) {
+        MenuBarExtra {
             ContentView()
                 .environmentObject(pipelineStore)
+        } label: {
+            Image(systemName: menuBarIcon)
+                .foregroundColor(menuBarColor)
         }
     }
     
@@ -28,6 +31,19 @@ struct BuildBarApp: App {
             return "arrow.triangle.2.circlepath.circle.fill"
         case .pending:
             return "clock.circle.fill"
+        }
+    }
+    
+    private var menuBarColor: Color {
+        switch pipelineStore.overallStatus {
+        case .success:
+            return .green
+        case .failed:
+            return .red
+        case .running:
+            return .blue
+        case .pending:
+            return .orange
         }
     }
 }
