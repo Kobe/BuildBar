@@ -25,7 +25,7 @@ struct ContentView: View {
             footerView
         }
         .padding()
-        .frame(minWidth: 300, maxWidth: 400)
+        .fixedSize()
     }
     
     private var headerView: some View {
@@ -70,27 +70,32 @@ struct PipelineRowView: View {
             Image(systemName: pipeline.status.icon)
                 .foregroundColor(pipeline.status.color)
                 .frame(width: 16)
+                .fixedSize()
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(pipeline.name)
                     .font(.system(size: 13, weight: .medium))
+                    .fixedSize(horizontal: true, vertical: false)
                 
                 Text(pipeline.repository)
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
+                    .fixedSize(horizontal: true, vertical: false)
             }
-            
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
             
             VStack(alignment: .trailing, spacing: 2) {
                 Text(pipeline.duration)
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
+                    .fixedSize(horizontal: true, vertical: false)
                 
                 Text(formatDate(pipeline.lastRun))
                     .font(.system(size: 10))
                     .foregroundColor(.gray)
+                    .fixedSize(horizontal: true, vertical: false)
             }
+            .fixedSize()
         }
         .padding(.vertical, 2)
     }
