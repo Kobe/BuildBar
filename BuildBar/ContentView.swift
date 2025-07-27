@@ -42,13 +42,22 @@ struct ContentView: View {
     }
     
     private var pipelineList: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            ForEach(Array(pipelineStore.pipelines.enumerated()), id: \.element.id) { index, pipeline in
-                PipelineRowView(pipeline: pipeline)
-                
-                if index < pipelineStore.pipelines.count - 1 {
-                    Divider()
-                        .padding(.vertical, 4)
+        let failedPipelines = pipelineStore.pipelines.filter { $0.status == .failed }
+        
+        return VStack(alignment: .leading, spacing: 0) {
+            if failedPipelines.isEmpty {
+                Text("All pipelines are passing! ✅")
+                    .font(.system(size: 13))
+                    .foregroundColor(.secondary)
+                    .padding(.vertical, 8)
+            } else {
+                ForEach(Array(failedPipelines.enumerated()), id: \.element.id) { index, pipeline in
+                    PipelineRowView(pipeline: pipeline)
+                    
+                    if index < failedPipelines.count - 1 {
+                        Divider()
+                            .padding(.vertical, 4)
+                    }
                 }
             }
         }
