@@ -2,142 +2,166 @@
 //  ContentView.swift
 //  BuildBar
 //
-//  Created by Kobe on 7/26/25.
+//  Menubar dropdown showing CI status
 //
 
 import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var pipelineStore: PipelineStore
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            headerView
-
-            Divider()
-                .padding(.vertical, 8)
-
             pipelineList
 
             Divider()
                 .padding(.vertical, 8)
 
-            footerView
+            menuItems
         }
         .padding()
         .fixedSize()
-        .task {
-            await pipelineStore.refresh()
-        }
     }
 
-    private var headerView: some View {
-        HStack {
-            Text("BuildBar")
-                .font(.headline)
-
-            Spacer()
-
-            if pipelineStore.isRefreshing {
-                ProgressView()
-                    .scaleEffect(0.7)
-                    .frame(width: 22, height: 22)
-            } else {
-                Image(systemName: pipelineStore.overallStatus.icon)
-                    .foregroundColor(pipelineStore.overallStatus.color)
-                    .font(.title2)
-            }
-        }
-    }
+    // MARK: - Pipeline List
 
     private var pipelineList: some View {
         let failedPipelines = pipelineStore.pipelines.filter { $0.status == .failed }
+        let groupedByRepo = Dictionary(grouping: failedPipelines) { $0.repository }
+        let sortedRepos = groupedByRepo.keys.sorted()
 
         return VStack(alignment: .leading, spacing: 0) {
             if let message = pipelineStore.errorMessage {
                 Text(message)
                     .font(.system(size: 12))
-                    .foregroundColor(.red)
+                    .foregroundColor(.buildBarRed)
                     .padding(.vertical, 8)
             } else if pipelineStore.isRefreshing && pipelineStore.pipelines.isEmpty {
-                Text("Lade Pipelines…")
+                Text("Loading pipelines...")
                     .font(.system(size: 13))
                     .foregroundColor(.secondary)
                     .padding(.vertical, 8)
             } else if failedPipelines.isEmpty {
-                Text("All pipelines are passing! ✅")
+                Text("All pipelines passing")
                     .font(.system(size: 13))
                     .foregroundColor(.secondary)
                     .padding(.vertical, 8)
             } else {
-                ForEach(Array(failedPipelines.enumerated()), id: \.element.id) { index, pipeline in
-                    PipelineRowView(pipeline: pipeline)
+                Text("FAILING RUNS")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.secondary)
+                    .padding(.bottom, 8)
 
-                    if index < failedPipelines.count - 1 {
-                        Divider()
-                            .padding(.vertical, 4)
+                ForEach(Array(sortedRepos.enumerated()), id: \.element) { repoIndex, repo in
+                    let pipelines = groupedByRepo[repo] ?? []
+
+                    ForEach(Array(pipelines.enumerated()), id: \.element.id) { index, pipeline in
+                        PipelineRowView(pipeline: pipeline, showRepo: index == pipelines.count - 1)
+
+                        if !(repoIndex == sortedRepos.count - 1 && index == pipelines.count - 1) {
+                            Divider()
+                                .padding(.vertical, 4)
+                        }
                     }
                 }
             }
         }
     }
 
-    private var footerView: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Button("Refresh All") {
-                Task { await pipelineStore.refresh() }
-            }
-            .disabled(pipelineStore.isRefreshing)
+    // MARK: - Last Refresh
 
-            Button("Quit") {
+    private var lastRefreshView: some View {
+        HStack {
+            if pipelineStore.isRefreshing {
+                ProgressView()
+                    .scaleEffect(0.6)
+                    .frame(width: 12, height: 12)
+                Text("Checking...")
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+            } else if let lastRefresh = pipelineStore.lastRefresh {
+                Text("Last checked \(formatDate(lastRefresh))")
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+        }
+    }
+
+    private func formatDate(_ date: Date) -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        return formatter.localizedString(for: date, relativeTo: Date())
+    }
+
+    // MARK: - Menu Items
+
+    private var menuItems: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            lastRefreshView
+
+            Divider()
+                .padding(.vertical, 4)
+
+            Button("Preferences...") {
+                openWindow(id: "preferences")
+            }
+            .buttonStyle(.plain)
+            .keyboardShortcut(",", modifiers: .command)
+
+            Divider()
+                .padding(.vertical, 4)
+
+            Button("Quit BuildBar") {
                 NSApplication.shared.terminate(nil)
             }
+            .buttonStyle(.plain)
+            .keyboardShortcut("q", modifiers: .command)
         }
     }
 }
 
 struct PipelineRowView: View {
     let pipeline: Pipeline
+    var showRepo: Bool = true
 
     var body: some View {
-        HStack(spacing: 8) {
-            HStack(spacing: 6) {
-                Image(systemName: pipeline.status.icon)
-                    .foregroundColor(pipeline.status.color)
-                    .frame(width: 16)
-                    .fixedSize()
-
-                Text(pipeline.name)
-                    .font(.system(size: 13, weight: .medium))
-                    .fixedSize(horizontal: true, vertical: false)
+        Button {
+            if let urlString = pipeline.htmlUrl, let url = URL(string: urlString) {
+                NSWorkspace.shared.open(url)
             }
+        } label: {
+            HStack(alignment: .top, spacing: 8) {
+                Circle()
+                    .fill(pipeline.status.color)
+                    .frame(width: 8, height: 8)
+                    .padding(.top, 5)
 
-            Spacer()
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(pipeline.name)
+                        .font(.system(size: 13, weight: .medium))
+                        .fixedSize(horizontal: true, vertical: false)
 
-            VStack(alignment: .trailing, spacing: 2) {
-                Text(pipeline.repository)
+                    if showRepo {
+                        Text(pipeline.repository)
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: true, vertical: false)
+                    }
+                }
+
+                Spacer()
+
+                Text(formatDate(pipeline.lastRun))
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
-                    .fixedSize(horizontal: true, vertical: false)
-
-                HStack(spacing: 4) {
-                    Text(pipeline.duration)
-                        .font(.system(size: 10))
-                        .foregroundColor(.gray)
-
-                    Text("•")
-                        .font(.system(size: 10))
-                        .foregroundColor(.gray)
-
-                    Text(formatDate(pipeline.lastRun))
-                        .font(.system(size: 10))
-                        .foregroundColor(.gray)
-                }
-                .fixedSize(horizontal: true, vertical: false)
+                    .padding(.top, 2)
             }
-            .fixedSize()
+            .padding(.vertical, 4)
+            .contentShape(Rectangle())
         }
-        .padding(.vertical, 6)
+        .buttonStyle(.plain)
     }
 
     private func formatDate(_ date: Date) -> String {
