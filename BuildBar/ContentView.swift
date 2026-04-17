@@ -9,43 +9,62 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var pipelineStore: PipelineStore
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             headerView
-            
+
             Divider()
                 .padding(.vertical, 8)
-            
+
             pipelineList
-            
+
             Divider()
                 .padding(.vertical, 8)
-            
+
             footerView
         }
         .padding()
         .fixedSize()
+        .task {
+            await pipelineStore.refresh()
+        }
     }
-    
+
     private var headerView: some View {
         HStack {
             Text("BuildBar")
                 .font(.headline)
-            
+
             Spacer()
-            
-            Image(systemName: pipelineStore.overallStatus.icon)
-                .foregroundColor(pipelineStore.overallStatus.color)
-                .font(.title2)
+
+            if pipelineStore.isRefreshing {
+                ProgressView()
+                    .scaleEffect(0.7)
+                    .frame(width: 22, height: 22)
+            } else {
+                Image(systemName: pipelineStore.overallStatus.icon)
+                    .foregroundColor(pipelineStore.overallStatus.color)
+                    .font(.title2)
+            }
         }
     }
-    
+
     private var pipelineList: some View {
         let failedPipelines = pipelineStore.pipelines.filter { $0.status == .failed }
-        
+
         return VStack(alignment: .leading, spacing: 0) {
-            if failedPipelines.isEmpty {
+            if let message = pipelineStore.errorMessage {
+                Text(message)
+                    .font(.system(size: 12))
+                    .foregroundColor(.red)
+                    .padding(.vertical, 8)
+            } else if pipelineStore.isRefreshing && pipelineStore.pipelines.isEmpty {
+                Text("Lade Pipelines…")
+                    .font(.system(size: 13))
+                    .foregroundColor(.secondary)
+                    .padding(.vertical, 8)
+            } else if failedPipelines.isEmpty {
                 Text("All pipelines are passing! ✅")
                     .font(.system(size: 13))
                     .foregroundColor(.secondary)
@@ -53,7 +72,7 @@ struct ContentView: View {
             } else {
                 ForEach(Array(failedPipelines.enumerated()), id: \.element.id) { index, pipeline in
                     PipelineRowView(pipeline: pipeline)
-                    
+
                     if index < failedPipelines.count - 1 {
                         Divider()
                             .padding(.vertical, 4)
@@ -62,13 +81,14 @@ struct ContentView: View {
             }
         }
     }
-    
+
     private var footerView: some View {
         VStack(alignment: .leading, spacing: 4) {
             Button("Refresh All") {
-                // TODO: Implement refresh functionality
+                Task { await pipelineStore.refresh() }
             }
-            
+            .disabled(pipelineStore.isRefreshing)
+
             Button("Quit") {
                 NSApplication.shared.terminate(nil)
             }
@@ -78,7 +98,7 @@ struct ContentView: View {
 
 struct PipelineRowView: View {
     let pipeline: Pipeline
-    
+
     var body: some View {
         HStack(spacing: 8) {
             HStack(spacing: 6) {
@@ -86,29 +106,29 @@ struct PipelineRowView: View {
                     .foregroundColor(pipeline.status.color)
                     .frame(width: 16)
                     .fixedSize()
-                
+
                 Text(pipeline.name)
                     .font(.system(size: 13, weight: .medium))
                     .fixedSize(horizontal: true, vertical: false)
             }
-            
+
             Spacer()
-            
+
             VStack(alignment: .trailing, spacing: 2) {
                 Text(pipeline.repository)
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: true, vertical: false)
-                
+
                 HStack(spacing: 4) {
                     Text(pipeline.duration)
                         .font(.system(size: 10))
                         .foregroundColor(.gray)
-                    
+
                     Text("•")
                         .font(.system(size: 10))
                         .foregroundColor(.gray)
-                    
+
                     Text(formatDate(pipeline.lastRun))
                         .font(.system(size: 10))
                         .foregroundColor(.gray)
@@ -119,7 +139,7 @@ struct PipelineRowView: View {
         }
         .padding(.vertical, 6)
     }
-    
+
     private func formatDate(_ date: Date) -> String {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .abbreviated

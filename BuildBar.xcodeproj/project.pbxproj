@@ -6,8 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		AA000A0A2E35805C00B635CF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CDD2B5FD2E35805C00B635CF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CDD2B6042E35805C00B635CF;
+			remoteInfo = BuildBar;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		CDD2B6052E35805C00B635CF /* BuildBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BuildBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0001012E35805C00B635CF /* BuildBarTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BuildBarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -16,10 +27,22 @@
 			path = BuildBar;
 			sourceTree = "<group>";
 		};
+		AA0002022E35805C00B635CF /* BuildBarTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = BuildBarTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		CDD2B6022E35805C00B635CF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA0004042E35805C00B635CF /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,6 +56,7 @@
 			isa = PBXGroup;
 			children = (
 				CDD2B6072E35805C00B635CF /* BuildBar */,
+				AA0002022E35805C00B635CF /* BuildBarTests */,
 				CDD2B6062E35805C00B635CF /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				CDD2B6052E35805C00B635CF /* BuildBar.app */,
+				AA0001012E35805C00B635CF /* BuildBarTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -70,6 +95,28 @@
 			productReference = CDD2B6052E35805C00B635CF /* BuildBar.app */;
 			productType = "com.apple.product-type.application";
 		};
+		AA0005052E35805C00B635CF /* BuildBarTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0008082E35805C00B635CF /* Build configuration list for PBXNativeTarget "BuildBarTests" */;
+			buildPhases = (
+				AA0003032E35805C00B635CF /* Sources */,
+				AA0004042E35805C00B635CF /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AA0009092E35805C00B635CF /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				AA0002022E35805C00B635CF /* BuildBarTests */,
+			);
+			name = BuildBarTests;
+			packageProductDependencies = (
+			);
+			productName = BuildBarTests;
+			productReference = AA0001012E35805C00B635CF /* BuildBarTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -82,6 +129,10 @@
 				TargetAttributes = {
 					CDD2B6042E35805C00B635CF = {
 						CreatedOnToolsVersion = 26.0;
+					};
+					AA0005052E35805C00B635CF = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = CDD2B6042E35805C00B635CF;
 					};
 				};
 			};
@@ -100,6 +151,7 @@
 			projectRoot = "";
 			targets = (
 				CDD2B6042E35805C00B635CF /* BuildBar */,
+				AA0005052E35805C00B635CF /* BuildBarTests */,
 			);
 		};
 /* End PBXProject section */
@@ -122,7 +174,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AA0003032E35805C00B635CF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AA0009092E35805C00B635CF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CDD2B6042E35805C00B635CF /* BuildBar */;
+			targetProxy = AA000A0A2E35805C00B635CF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		CDD2B60E2E35805D00B635CF /* Debug */ = {
@@ -303,6 +370,48 @@
 			};
 			name = Release;
 		};
+		AA0006062E35805C00B635CF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.kobe.BuildBarTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BuildBar.app/Contents/MacOS/BuildBar";
+			};
+			name = Debug;
+		};
+		AA0007072E35805C00B635CF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.kobe.BuildBarTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BuildBar.app/Contents/MacOS/BuildBar";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -320,6 +429,15 @@
 			buildConfigurations = (
 				CDD2B6112E35805D00B635CF /* Debug */,
 				CDD2B6122E35805D00B635CF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA0008082E35805C00B635CF /* Build configuration list for PBXNativeTarget "BuildBarTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0006062E35805C00B635CF /* Debug */,
+				AA0007072E35805C00B635CF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
