@@ -4,32 +4,58 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-BuildBar is a macOS menubar application built with SwiftUI to visualize the status of CI/CD pipelines. The project follows the standard iOS/macOS app structure using Xcode.
+BuildBar is a macOS menubar application built with SwiftUI that monitors GitHub Actions workflow runs. It displays the status of CI/CD pipelines directly in the menubar with color-coded icons and notifications for failures.
 
 ## Development Commands
 
 Since this is an Xcode project, development is primarily done through Xcode IDE:
 
-- **Build**: Use Xcode's Product → Build (⌘B) or build from command line with `xcodebuild`
+- **Build**: Use Xcode's Product → Build (⌘B) or `xcodebuild -scheme BuildBar build`
 - **Run**: Use Xcode's Product → Run (⌘R) to launch the app
-- **Test**: Use Xcode's Product → Test (⌘U) for running unit tests
+- **Test**: Use Xcode's Product → Test (⌘U) or `xcodebuild -scheme BuildBar test`
 - **Clean**: Use Xcode's Product → Clean Build Folder (⌘⇧K)
 
 ## Architecture
 
-- **BuildBarApp.swift**: Main app entry point using SwiftUI's `@main` attribute
-- **ContentView.swift**: Primary view currently showing placeholder content
-- **Assets.xcassets/**: App icons and color assets
-- Project uses SwiftUI for the user interface framework
-- Standard iOS/macOS app architecture with separation of app lifecycle and views
+### App Entry Point
+- **BuildBarApp.swift**: MenuBarExtra-based app with icon animation for failures
 
-## Key Files
+### Views
+- **ContentView.swift**: Menubar dropdown showing failing runs grouped by repository
+- **Views/PreferencesView.swift**: Combined settings window with Workflows and Settings tabs
+- **Views/RepoListView.swift**: Repository list in workflow configuration
+- **Views/WorkflowListView.swift**: Workflow selection checkboxes
 
-- `BuildBar.xcodeproj/`: Xcode project configuration
-- `BuildBar/`: Main source directory containing Swift files
-- `LICENSE`: Project license file
-- `README.md`: Basic project description
+### Models
+- **PipelineModel.swift**: Pipeline, PipelineStatus, PipelineStore (state management with polling)
+- **Models/GitHubModels.swift**: GitHub API DTOs (User, Repository, Workflow, WorkflowRun)
+- **Models/AppSettings.swift**: PollingInterval enum and AppSettings with @AppStorage
 
-## Development Notes
+### ViewModels
+- **ViewModels/SettingsViewModel.swift**: Token management and validation
+- **ViewModels/RunConfigViewModel.swift**: Repository and workflow loading
 
-This is a fresh SwiftUI project with minimal implementation. The ContentView currently displays placeholder content that will need to be replaced with actual CI/CD pipeline visualization functionality.
+### Services
+- **Services/GitHubService.swift**: GitHub REST API client implementing PipelineService
+- **Services/KeychainService.swift**: Secure PAT storage using Keychain
+- **Services/NotificationService.swift**: System notifications and sound alerts
+
+### Utilities
+- **Utilities/AccessibleColors.swift**: WCAG 2.2 AA compliant color palette
+- **Utilities/MenubarIconAnimator.swift**: Timer-based icon blinking
+
+## Key Design Decisions
+
+- **Protocol-based services**: `PipelineService` protocol allows mocking for tests
+- **@MainActor isolation**: All UI state uses MainActor for thread safety
+- **Menubar-only**: LSUIElement=true hides dock icon
+- **Keychain storage**: GitHub PAT stored securely, never in UserDefaults
+- **WCAG 2.2 AA colors**: All status colors meet 4.5:1 contrast ratio
+
+## Testing
+
+47 unit tests covering:
+- Pipeline model and status logic
+- GitHub model JSON decoding
+- AppSettings and PollingInterval
+- PipelineStore refresh, polling, and failure detection
