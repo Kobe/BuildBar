@@ -25,8 +25,21 @@ private struct MockError: Error, LocalizedError {
 // MARK: - Pipeline Factory
 
 private extension Pipeline {
-    static func make(status: PipelineStatus, name: String = "Test") -> Pipeline {
-        Pipeline(name: name, repository: "test/repo", status: status, lastRun: Date(), duration: "1m")
+    static func make(
+        status: PipelineStatus,
+        name: String = "Test",
+        repository: String = "test/repo",
+        lastRun: Date = Date(),
+        htmlUrl: String? = nil
+    ) -> Pipeline {
+        Pipeline(
+            name: name,
+            repository: repository,
+            status: status,
+            lastRun: lastRun,
+            duration: "1m",
+            htmlUrl: htmlUrl
+        )
     }
 }
 
@@ -140,5 +153,83 @@ final class PipelineStoreRefreshTests: XCTestCase {
         XCTAssertTrue(store.pipelines.isEmpty)
         XCTAssertFalse(store.isRefreshing)
         XCTAssertNil(store.errorMessage)
+        XCTAssertNil(store.lastRefresh)
+    }
+
+    func testRefreshSetsLastRefreshOnSuccess() async {
+        let store = PipelineStore(service: MockPipelineService(pipelines: [.make(status: .success)]))
+        XCTAssertNil(store.lastRefresh)
+        await store.refresh()
+        XCTAssertNotNil(store.lastRefresh)
+    }
+
+    func testRefreshDoesNotSetLastRefreshOnError() async {
+        let store = PipelineStore(service: MockPipelineService(pipelines: [], error: MockError()))
+        await store.refresh()
+        XCTAssertNil(store.lastRefresh)
+    }
+}
+
+// MARK: - failedCount Tests
+
+@MainActor
+final class PipelineStoreFailedCountTests: XCTestCase {
+
+    func testFailedCountWithNoFailures() async {
+        let store = PipelineStore(service: MockPipelineService(pipelines: [
+            .make(status: .success),
+            .make(status: .running),
+        ]))
+        await store.refresh()
+        XCTAssertEqual(store.failedCount, 0)
+    }
+
+    func testFailedCountWithSomeFailures() async {
+        let store = PipelineStore(service: MockPipelineService(pipelines: [
+            .make(status: .success),
+            .make(status: .failed),
+            .make(status: .failed),
+            .make(status: .running),
+        ]))
+        await store.refresh()
+        XCTAssertEqual(store.failedCount, 2)
+    }
+
+    func testFailedCountWithAllFailures() async {
+        let store = PipelineStore(service: MockPipelineService(pipelines: [
+            .make(status: .failed),
+            .make(status: .failed),
+            .make(status: .failed),
+        ]))
+        await store.refresh()
+        XCTAssertEqual(store.failedCount, 3)
+    }
+
+    func testFailedCountWithEmptyPipelines() async {
+        let store = PipelineStore(service: MockPipelineService(pipelines: []))
+        await store.refresh()
+        XCTAssertEqual(store.failedCount, 0)
+    }
+}
+
+// MARK: - Pipeline Grouping Tests
+
+@MainActor
+final class PipelineGroupingTests: XCTestCase {
+
+    func testPipelinesCanBeGroupedByRepository() async {
+        let store = PipelineStore(service: MockPipelineService(pipelines: [
+            .make(status: .failed, name: "build", repository: "acme/web"),
+            .make(status: .failed, name: "test", repository: "acme/web"),
+            .make(status: .failed, name: "lint", repository: "acme/api"),
+        ]))
+        await store.refresh()
+
+        let failedPipelines = store.pipelines.filter { $0.status == .failed }
+        let grouped = Dictionary(grouping: failedPipelines) { $0.repository }
+
+        XCTAssertEqual(grouped.keys.count, 2)
+        XCTAssertEqual(grouped["acme/web"]?.count, 2)
+        XCTAssertEqual(grouped["acme/api"]?.count, 1)
     }
 }

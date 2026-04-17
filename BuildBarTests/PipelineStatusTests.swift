@@ -4,26 +4,27 @@
 //
 
 import XCTest
+import SwiftUI
 @testable import BuildBar
 
 final class PipelineStatusTests: XCTestCase {
 
-    // MARK: - Color
+    // MARK: - Color (WCAG 2.2 AA compliant colors)
 
     func testSuccessColor() {
-        XCTAssertEqual(PipelineStatus.success.color, .green)
+        XCTAssertEqual(PipelineStatus.success.color, .buildBarGreen)
     }
 
     func testFailedColor() {
-        XCTAssertEqual(PipelineStatus.failed.color, .red)
+        XCTAssertEqual(PipelineStatus.failed.color, .buildBarRed)
     }
 
     func testRunningColor() {
-        XCTAssertEqual(PipelineStatus.running.color, .blue)
+        XCTAssertEqual(PipelineStatus.running.color, .buildBarBlue)
     }
 
     func testPendingColor() {
-        XCTAssertEqual(PipelineStatus.pending.color, .orange)
+        XCTAssertEqual(PipelineStatus.pending.color, .buildBarOrange)
     }
 
     // MARK: - Icon
