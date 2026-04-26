@@ -57,7 +57,7 @@ struct ContentView: View {
                     let pipelines = groupedByRepo[repo] ?? []
 
                     ForEach(Array(pipelines.enumerated()), id: \.element.id) { index, pipeline in
-                        PipelineRowView(pipeline: pipeline, showRepo: index == pipelines.count - 1)
+                        PipelineRowView(pipeline: pipeline, showRepo: true)
 
                         if !(repoIndex == sortedRepos.count - 1 && index == pipelines.count - 1) {
                             Divider()
@@ -138,18 +138,12 @@ struct PipelineRowView: View {
                     .frame(width: 8, height: 8)
                     .padding(.top, 5)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(pipeline.name)
-                        .font(.system(size: 13, weight: .medium))
-                        .fixedSize(horizontal: true, vertical: false)
-
-                    if showRepo {
-                        Text(pipeline.repository)
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
-                            .fixedSize(horizontal: true, vertical: false)
-                    }
-                }
+                (Text(pipeline.name)
+                    .font(.system(size: 13, weight: .medium)) +
+                Text("\n\(pipeline.repository)")
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary))
+                .fixedSize(horizontal: true, vertical: false)
 
                 Spacer()
 
