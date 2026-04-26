@@ -116,16 +116,15 @@ class RunConfigViewModel: ObservableObject {
     }
 
     func aggregateStatus(for repo: GitHubRepository) -> PipelineStatus {
-        let repoWorkflows = settings.monitoredWorkflows.filter {
-            $0.repoFullName == repo.fullName && $0.isEnabled
-        }
-
-        guard !repoWorkflows.isEmpty else {
+        guard selectedRepo?.fullName == repo.fullName else {
             return .success
         }
 
-        // This is a simplified version - in reality we'd need to track actual run statuses
-        // For now, return success as default
+        let statuses = workflows.compactMap { workflowStatuses[$0.id] }
+
+        if statuses.contains(where: { $0 == .failed }) { return .failed }
+        if statuses.contains(where: { $0 == .running }) { return .running }
+        if statuses.contains(where: { $0 == .pending }) { return .pending }
         return .success
     }
 }

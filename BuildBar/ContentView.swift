@@ -71,21 +71,30 @@ struct ContentView: View {
 
     // MARK: - Last Refresh
 
+    @ViewBuilder
     private var lastRefreshView: some View {
-        HStack {
-            if pipelineStore.isRefreshing {
+        if pipelineStore.isRefreshing {
+            HStack(spacing: 4) {
                 ProgressView()
                     .scaleEffect(0.6)
                     .frame(width: 12, height: 12)
                 Text("Checking...")
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
-            } else if let lastRefresh = pipelineStore.lastRefresh {
-                Text("Last checked \(formatDate(lastRefresh))")
-                    .font(.system(size: 11))
-                    .foregroundColor(.secondary)
             }
-            Spacer()
+        } else if let lastRefresh = pipelineStore.lastRefresh {
+            Button {
+                Task { await pipelineStore.refresh() }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 11))
+                    Text("Last checked \(formatDate(lastRefresh))")
+                        .font(.system(size: 11))
+                }
+                .foregroundColor(.secondary)
+            }
+            .buttonStyle(.plain)
         }
     }
 
@@ -102,7 +111,6 @@ struct ContentView: View {
             lastRefreshView
 
             Divider()
-                .padding(.vertical, 4)
 
             Button("Preferences...") {
                 openWindow(id: "preferences")
