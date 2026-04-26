@@ -9,8 +9,12 @@ import SwiftUI
 
 @main
 struct BuildBarApp: App {
-    @StateObject private var pipelineStore = PipelineStore()
+    @StateObject private var pipelineStore: PipelineStore
     @StateObject private var iconAnimator = MenubarIconAnimator()
+
+    init() {
+        _pipelineStore = StateObject(wrappedValue: PipelineStore())
+    }
 
     var body: some Scene {
         // Menubar dropdown

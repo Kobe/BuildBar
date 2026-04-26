@@ -100,10 +100,14 @@ class PipelineStore: ObservableObject {
     init(service: (any PipelineService)? = nil, notificationService: NotificationService? = nil) {
         self.notificationService = notificationService ?? NotificationService.shared
 
-        // Use GitHubService if token exists, otherwise LocalPipelineService for testing
+        // Seed test workflows if none exist
+        AppSettings.shared.seedTestWorkflows()
+
+        // Use GitHubService if monitored workflows exist or token exists, otherwise LocalPipelineService for testing
+        let workflows = AppSettings.shared.monitoredWorkflows
         if let providedService = service {
             self.service = providedService
-        } else if KeychainService.shared.hasToken {
+        } else if !workflows.isEmpty || KeychainService.shared.hasToken {
             self.service = GitHubService()
         } else {
             self.service = LocalPipelineService()

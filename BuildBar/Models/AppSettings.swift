@@ -79,4 +79,29 @@ class AppSettings: ObservableObject {
     func isWorkflowMonitored(repoFullName: String, workflowId: Int) -> Bool {
         monitoredWorkflows.contains { $0.repoFullName == repoFullName && $0.workflowId == workflowId && $0.isEnabled }
     }
+
+    func seedTestWorkflows() {
+        guard monitoredWorkflows.isEmpty else { return }
+
+        let testWorkflows = [
+            MonitoredWorkflow(
+                repoFullName: "Kobe/fizz-buzz-service",
+                workflowId: 9315924,
+                workflowName: "verify_main_branch",
+                branchFilter: nil,
+                isEnabled: true
+            ),
+            MonitoredWorkflow(
+                repoFullName: "Kobe/fizz-buzz-service",
+                workflowId: 9315737,
+                workflowName: "verify_pull_request",
+                branchFilter: nil,
+                isEnabled: true
+            )
+        ]
+
+        for workflow in testWorkflows {
+            addMonitoredWorkflow(workflow)
+        }
+    }
 }

@@ -136,6 +136,11 @@ class GitHubService: PipelineService {
         let settings = AppSettings.shared
         let monitoredWorkflows = settings.monitoredWorkflows.filter { $0.isEnabled }
 
+        print("DEBUG: fetchPipelines called, monitored workflows: \(monitoredWorkflows.count)")
+        for w in monitoredWorkflows {
+            print("DEBUG: - \(w.repoFullName)/\(w.workflowName) (id: \(w.workflowId))")
+        }
+
         guard !monitoredWorkflows.isEmpty else {
             return []
         }
@@ -187,17 +192,15 @@ class GitHubService: PipelineService {
     // MARK: - Private Helpers
 
     private func request<T: Decodable>(endpoint: String, queryItems: [URLQueryItem] = []) async throws -> T {
-        guard let token = keychainService.getToken() else {
-            throw GitHubError.noToken
-        }
-
         var components = URLComponents(string: baseURL + endpoint)!
         if !queryItems.isEmpty {
             components.queryItems = queryItems
         }
 
         var request = URLRequest(url: components.url!)
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        if let token = keychainService.getToken() {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
         request.setValue("2022-11-28", forHTTPHeaderField: "X-GitHub-Api-Version")
 
