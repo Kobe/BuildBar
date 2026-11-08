@@ -41,7 +41,7 @@ Since this is an Xcode project, development is primarily done through Xcode IDE:
 - **Services/NotificationService.swift**: System notifications and sound alerts
 
 ### Utilities
-- **Utilities/AccessibleColors.swift**: WCAG 2.2 AA compliant color palette
+- **Utilities/AccessibleColors.swift**: Status color palette (targets WCAG 2.2 AA)
 - **Utilities/MenubarIconAnimator.swift**: Timer-based icon blinking
 
 ## Key Design Decisions
@@ -50,7 +50,13 @@ Since this is an Xcode project, development is primarily done through Xcode IDE:
 - **@MainActor isolation**: All UI state uses MainActor for thread safety
 - **Menubar-only**: LSUIElement=true hides dock icon
 - **Keychain storage**: GitHub PAT stored securely, never in UserDefaults
-- **WCAG 2.2 AA colors**: All status colors meet 4.5:1 contrast ratio
+- **WCAG 2.2 AA colors**: Status palette aims for 4.5:1 contrast (not yet met on all backgrounds, see ACCESSIBILITY.md)
+
+## Accessibility
+
+- Target: WCAG 2.2 AA is required for every change; AAA is a bonus goal where feasible. Accessibility issues must carry the `a11y` label.
+- Read `ACCESSIBILITY.md` before changing any UI (menubar icon, dropdown, Preferences, notifications).
+- Keep its "Known barriers" section updated whenever a barrier is fixed or introduced; only state what is verifiable in code or tests.
 
 ## Testing
 
